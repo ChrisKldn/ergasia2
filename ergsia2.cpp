@@ -9,30 +9,34 @@
 using namespace std;
 
 //Klash ylopoihshs struct
-class Structure{
+class node{
 public:
   int num;
   string string1;
   string string2;
   string string3;
-	Structure* p_left;
-	Structure* p_rigth;
+	node* left;
+	node* right;
   //gia na mporesoume na dhmiourgisoume ena array typou class Structure
   //tha prepei na ftiaksoume enan dummy constructor
-  Structure(){}
-  Structure(int number,string s1,string s2,string s3){
+  node(){}
+  node(int number,string s1,string s2,string s3){
     num=number;
-    s1=string1;
-    s2=string2;
-    s3=string3;
+    string1=s1;
+    string2=s2;
+    string3=s3;
   }
 };
 
-Structure* createNode(int num);
-void addInOrder(Structure *root, Structure *newNode);
+node* GetNewNode(int data);
+node* Insert(node* root,int data);
+node* Search(node* root,int data);
+void Postorder(node* node);
+void Preorder(node* node);
+void Inorder( node* node);
 
 int main(){
-  Structure array_str[100];
+  node array_str[100];
 	//perasma tyxaiwn dedomenwn apo to arxeio rand_data.csv sto pinaka array_str
   fstream rand_data;
   rand_data.open("rand_data.csv",ios::in);
@@ -47,40 +51,117 @@ int main(){
 			row.push_back(word);
     //to vector apo8hkeyei string data,ara to row2[0] pou periexei ton akeraio arithmo prepei na metatrapei apo string se int
     int a=stoi(row[0]);
-		array_str[i]=Structure(a,row[1],row[2],row[3]);
+		array_str[i]=node(a,row[1],row[2],row[3]);
 	}
-  cout<<createNode(array_str[0].num)<<endl;
-	
+  //Eisagwgh eggrafwn sto dyadiko dendro
+  node* stoixeio;
+  node* root = NULL;  // DHmiourgia adeiou dendrou
+  for(int i=0;i<100;i++){
+    root = Insert(root,array_str[i].num);
+    if (i==0)
+      stoixeio=root;
+  }
+	cout<<"Menu"<<endl;
+	cout<<"1. Search "<<endl;
+	cout<<"2. Print Preorder  "<<endl;
+	cout<<"3. Print Postorder "<<endl;
+	cout<<"4. Print Inorder "<<endl;
+  int answer;
+  cin>>answer;
+	if (answer==1){
+		int numberS;
+		cout<<"Eisagete ton arithmo anazhthshs: ";
+		cin>>numberS;
+		node* komvos=Search(root,numberS);
+    	for(int i=0;i<100;i++){
+      		if(array_str[i].num == numberS){
+        		cout<<"Eggrafh: "<<endl;
+        		cout<<array_str[i].string1<<endl;
+        		cout<<array_str[i].string2<<endl;
+       			cout<<array_str[i].string3<<endl;
+       		}
+    	}
+	}else if(answer==2){
+		Preorder(stoixeio);
+	}else if(answer==3){
+		Postorder(stoixeio);
+	}else if(answer==4){
+		Inorder(stoixeio);
+	}
+
 	return 0;
 }
 
-Structure* createNode(int num) {
-	Structure *r;
-	
-	r = (Structure *) malloc(sizeof(Structure));
-	if (r != NULL) {
-		int key=num;
-  		r->p_left;
-  		r->p_rigth;
-  	}
-	return r;
+node* GetNewNode(int data) {
+	node* newNode = new node();
+	newNode->num = data;
+	newNode->left = newNode->right = NULL;
+	return newNode;
 }
 
-void addInOrder(Structure *root, Structure *newNode,int key) {
-	if (strcmp(newNode->num, root->num) <= 0) {
-		if (root->p_left == NULL) { 
-			root->p_left = newNode;
-		}
-		else {
-			addInOrder(root->p_left, newNode);
-		}
+//Eisagwgh eggrafhs sto dyadiko dendro
+node* Insert(node* root,int data) {
+	if(root == NULL) {
+		root = GetNewNode(data);
 	}
-	else {  
-		if (root->p_rigth == NULL) {
-			root->p_rigth = newNode;
-		}
-		else {
-			addInOrder(root->p_rigth, newNode);
-		}
+	//an to num ths eggrafhs einai mikrotero,tote ginetai eisasgwgh ths eggrafhs sto aristero ypodendro
+	else if(data <= root->num) {
+		root->left = Insert(root->left,data);
 	}
+	//diaforetika,eisagwgh sto deksi ypodendro
+	else {
+		root->right = Insert(root->right,data);
+	}
+	return root;
+}
+
+//Anazhthsh eggrafhs,epistrefei True an h eggrafh yparxei sto dyadiko dendro
+node* Search(node* root,int data) {
+	if(root == NULL) {
+		cout<<"O arithmos pou anazhthte den yparxei.";
+	}
+	else if(root->num == data) {
+		return root;
+	}
+	else if(data <= root->num) {
+		return Search(root->left,data);
+	}
+	else {
+		return Search(root->right,data);
+	}
+}
+
+//Postorder diasxish dendrou
+void Postorder(node* node){
+    if (node == NULL)
+        return;
+    // first recur on left subtree
+    Postorder(node->left);
+    // then recur on right subtree
+    Postorder(node->right);
+    // now deal with the node
+    printf("%d ", node->num);
+}
+
+//Preorder diasxish dendrou
+void Preorder(node* node){
+    if (node == NULL)
+        return;
+    printf("%d ", node->num);
+
+    Preorder(node->left);
+
+    Preorder(node->right);
+}
+
+//Inorder diasxish dendrou
+void Inorder( node* node){
+    if (node == NULL)
+        return;
+
+    Inorder(node->left);
+
+    printf("%d ", node->num);
+
+    Inorder(node->right);
 }
